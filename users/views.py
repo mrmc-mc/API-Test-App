@@ -1,15 +1,19 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import RegisterSerializer
+from .serializers import UserSerializer
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from .utils import verify_captcha
+from .utils import verify_captcha, Jwt_handler
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from django.core.files.base import ContentFile
 from django.utils.timezone import now
+from django.contrib import auth
+from django.conf import settings
+import datetime
+import jwt
 
 User = get_user_model()
 
@@ -24,12 +28,12 @@ class RegisterAPIView(APIView):
         #google = request.data["google-code"]
         #g_response = request.data.get('g-recaptcha-response')
         img_FileCode = ContentFile(img_base64,
-                             f"{request.data['first_name']}_{request.data['last_name']}-{now()}.txt")
+                            f"{request.data['first_name']}_{request.data['last_name']}-{now()}.txt")
 
         user["image_file"] = img_FileCode
         #if verify_captcha(g_response):
         if True:
-                serializer = RegisterSerializer(data=user)
+                serializer = UserSerializer(data=user)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
                 status_code = status.HTTP_201_CREATED
@@ -41,36 +45,56 @@ class RegisterAPIView(APIView):
 
 
 class LoginAPIView(APIView):
-
     def post(self, request):
-        email = request.data['email']
-        password = request.data['password']
 
-        user = User.objects.filter(email=email).first()
+        try:
+            payload = Jwt_handler.decode(token=request.data['jwt'])
+            email = payload['email']
+            password = payload['password']
 
-        if user is None:
-            raise AuthenticationFailed('User not found!')
+            user = User.objects.filter(email=email).first()
 
-        if not user.check_password(password):
-            raise AuthenticationFailed('Incorrect password!')
+            if user is None:
+                raise AuthenticationFailed('User not found!')
+
+            if not user.check_password(password):
+                raise AuthenticationFailed('Incorrect password!')
 
 
-        token = RefreshToken.for_user(user)
+            data = {
+                'message': "success"
+            }
+        except:
+            data = {
+                'message': "somthing wrong"
+            }
 
-        response = Response()
+        return Response(data)
 
-        response.set_cookie(key='jwt', value=str(token.access_token), httponly=True)
-        response.data = {
-            'jwt': str(token.access_token)
-        }
-        return response
+
+class UserAPIView(APIView):
+
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            payload = 1
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user = User.objects.filter(id=payload['id']).first()
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
 
 class LogoutAPIView(APIView):
-
     def post(self, request):
         response = Response()
         response.delete_cookie('jwt')
+        # auth.logout(request)
         response.data = {
             'message': 'success'
         }

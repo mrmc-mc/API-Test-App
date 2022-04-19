@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     #Third-party APPS
     'captcha',
     'rest_framework',
+    'corsheaders',
 
     #Local APPs
     'users',
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -158,3 +160,7 @@ RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
 
 #Custom User Model
 AUTH_USER_MODEL = 'users.CustomUser'
+
+
+
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1','http://*127.0.0.1',"http://*","moz-extension://e4c56056-eb55-4970-8a8b-f8bf40226a4d"]
