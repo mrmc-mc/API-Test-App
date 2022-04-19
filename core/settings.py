@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    #Third-party APPS
+    'captcha',
+    'rest_framework',
+
+    #Local APPs
+    'users',
 ]
 
 THIRD_PARTY_APPS = [
@@ -122,6 +130,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -138,3 +149,12 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
 
 SERVER_EMAIL = config('SERVER_EMAIL')
+
+
+
+# Captcha Keys
+RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
+
+#Custom User Model
+AUTH_USER_MODEL = 'users.CustomUser'
