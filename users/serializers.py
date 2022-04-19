@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
  
 User = get_user_model()
 
-class RegisterSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
  
     date_joined = serializers.ReadOnlyField()
     

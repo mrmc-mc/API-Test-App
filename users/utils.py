@@ -1,4 +1,7 @@
-from django.utils.timezone import now
+# Tools
+from django.conf import settings
+import jwt
+
 
 def user_upload_dir(instance , filename):
     """  set upload directroy by user id and change file name   """
@@ -28,3 +31,19 @@ def verify_captcha(response):
         return True
     else:
         return False
+
+
+class Jwt_handler:
+    """  Module for Encode/Decode JWT   """
+
+
+    @staticmethod
+    def encode(payload):
+        token = jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm='HS256')
+        return token
+
+
+    @staticmethod
+    def decode(token):
+        payload = jwt.decode(jwt=token, key=settings.SECRET_KEY, algorithms=['HS256'])
+        return payload
