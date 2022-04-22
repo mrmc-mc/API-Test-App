@@ -1,36 +1,16 @@
 # Tools
+
 from django.conf import settings
 import jwt
+
+from django.core.mail import send_mail
+import threading
 
 
 def user_upload_dir(instance , filename):
     """  set upload directroy by user id and change file name   """
 
     return f'user_{instance.national_code}/{filename}'
-
-
-
-def verify_captcha(response):
-    
-    from django.conf import settings
-    import requests
-    
-    ''' reCAPTCHA validation '''
-    recaptcha_response = response
-    data = {
-    'secret': settings.RECAPTCHA_PRIVATE_KEY,
-    'response': recaptcha_response
-    }
-    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
-    result = r.json()
-
-    print(result)
-
-    ''' if reCAPTCHA returns True '''
-    if result['success']:
-        return True
-    else:
-        return False
 
 
 class Jwt_handler:
@@ -47,3 +27,32 @@ class Jwt_handler:
     def decode(token):
         payload = jwt.decode(jwt=token, key=settings.SECRET_KEY, algorithms=['HS256'])
         return payload
+
+
+class EmailThread(threading.Thread):
+
+        def __init__(self, subject, body, sender, email):
+                self.subject = subject
+                self.body = body
+                self.sender = sender
+                self.email = email
+                threading.Thread.__init__(self)
+
+
+
+        def run(self):
+                """ send an email """
+
+                try:
+
+                        send_mail(subject= self.subject,
+                                message=None,
+                                html_message=self.body,
+                                from_email= self.sender,
+                                recipient_list= self.email, 
+                                fail_silently=False)
+
+                        return True
+
+                except Exception as e:
+                        return False

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
     #Third-party APPS
     'captcha',
@@ -46,12 +47,15 @@ INSTALLED_APPS = [
     'corsheaders',
 
     #Local APPs
-    'users',
+    'users.apps.UsersConfig',
 ]
 
-THIRD_PARTY_APPS = [
+# THIRD_PARTY_APPS = [
 
-]
+# ]
+
+SITE_ID = 1
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -142,13 +146,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 #Email Settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT', cast=int)
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
 SERVER_EMAIL = config('SERVER_EMAIL')
 
@@ -164,3 +170,15 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 
 CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1','http://*127.0.0.1',"http://*","moz-extension://e4c56056-eb55-4970-8a8b-f8bf40226a4d"]
+
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://test:test@localhost:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
