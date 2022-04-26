@@ -1,10 +1,16 @@
 from django.urls import path
-from .views import LoginAPIView, RegisterAPIView, LogoutAPIView
+from .views import (LoginAPIView, RegisterAPIView,
+                 LogoutAPIView, ChangePasswordAPIView,
+                  OtpRegVerificationAPIView, OauthAPIView)
 
 app_name = 'users'
 
 urlpatterns = [
-    path('register/', RegisterAPIView.as_view(), name='login'),
-    path('login/', LoginAPIView.as_view(), name='register'),
+    path('register/', RegisterAPIView.as_view(), name='register'),
+    path('login/', LoginAPIView.as_view(), name='login'),
+    path('changepw/', ChangePasswordAPIView.as_view(), name='change-password'),
     path('logout/', LogoutAPIView.as_view(), name='logout'),
+    path('email-verify/', OtpRegVerificationAPIView.as_view(), name='email-verify'),
+    path('otp/', OauthAPIView.as_view(), name='otp-verify'),
+    path('reset-password/', OtpRegVerificationAPIView.as_view(), name='reset-password'),
 ]

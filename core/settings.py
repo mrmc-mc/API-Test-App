@@ -66,6 +66,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'users.middlewares.JwtToDataMiddleware',
+    'users.middlewares.DataToJwtMiddleware',
+    'users.middlewares.ActiveEmailMiddleware',
+    'users.middlewares.OauthMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -148,15 +152,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #Email Settings
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD = 'localhost', 1025, None, None
 
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT', cast=int)
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+# DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+DEFAULT_FROM_EMAIL = 'example@gmail.com'
 
-SERVER_EMAIL = config('SERVER_EMAIL')
+# SERVER_EMAIL = config('SERVER_EMAIL')
 
 
 
@@ -176,7 +182,7 @@ CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1','http://*127.0.0.1',"http://*","moz-e
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://test:test@localhost:6379/0",
+        "LOCATION": "redis://localhost:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

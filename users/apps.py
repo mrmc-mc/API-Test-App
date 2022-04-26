@@ -8,6 +8,8 @@ class UsersConfig(AppConfig):
     name = 'users'
 
     def ready(self):
-        from .signals import create_group, sendOTP_after_registration
+        from .signals import create_group, sendOTP_after_registration, OauthGenerator
+        
         post_migrate.connect(create_group, sender=self)
         post_save.connect(sendOTP_after_registration, sender=settings.AUTH_USER_MODEL)
+        post_save.connect(OauthGenerator, sender=settings.AUTH_USER_MODEL)

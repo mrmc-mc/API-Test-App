@@ -53,10 +53,7 @@ class CreationBaseModel(models.Model):
         ordering = ['created_at']
 
 
-# class UserOTP(CreationBaseModel):
-    
-#     email_otp = models.CharField(verbose_name="Email OTP code", max_length=6, blank=True, null=True)
-#     mobile_otp = models.CharField(verbose_name="Mobile OTP code", max_length=6, blank=True, null=True)
+
 
 User = get_user_model()    
 
@@ -66,3 +63,13 @@ class PersonalInfo(CreationBaseModel):
     first_name          = models.CharField(verbose_name="First Name", max_length=255)
     last_name           = models.CharField(verbose_name="Last Name", max_length=255)
     national_code       = models.CharField(verbose_name="National Code" , unique=True , max_length=13)
+
+
+
+
+class OauthInfo(CreationBaseModel):
+    
+    user                = models.OneToOneField(User, on_delete=models.CASCADE, related_name="uauth")
+    secret              = models.CharField(verbose_name="Oauth secret", max_length=64, unique=True, blank=True, null=True)
+    uri                 = models.CharField(verbose_name="Oauth uri", max_length=2500, unique=True, blank=True, null=True)
+    is_enabled          = models.BooleanField(default=False)

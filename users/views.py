@@ -1,12 +1,11 @@
 from rest_framework.views import APIView
+from rest_framework.generics import UpdateAPIView
 from rest_framework.response import Response
-from .serializers import UserSerializer, PersonalInfoSerializer
+from .serializers import UserSerializer, PersonalInfoSerializer, ChangePasswordSerializer
 from rest_framework import status
-from rest_framework.permissions import AllowAny
-from .utils import Jwt_handler
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from .utils import Jwt_handler, Email, Oauth_handler
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from django.core.files.base import ContentFile
 from django.utils.timezone import now
@@ -20,21 +19,17 @@ User = get_user_model()
 
 
 class RegisterAPIView(APIView):
-    # Allow any user (authenticated or not) to access this url 
+    """
+    An endpoint for register user.
+    """    
     permission_classes = (AllowAny,)
  
     def post(self, request):
         try:
-            reg_data = request.data
-            img_base64 = request.data.get("image_file")
-
-            img_FileCode = ContentFile(img_base64,
-                                f"{request.data['first_name']}_{request.data['last_name']}-{now()}.txt")
-            reg_data["image_file"] = img_FileCode
+            reg_data = request.jwt_data
             user_serializer = UserSerializer(data=reg_data)
             user_serializer.is_valid(raise_exception=True)
             user = user_serializer.save()
-            print(type(user))
 
             info_serializer = PersonalInfoSerializer(instance=user, data=reg_data)
             if info_serializer.is_valid(raise_exception=True):
@@ -49,70 +44,178 @@ class RegisterAPIView(APIView):
         except Exception as e:
             status_code = status.HTTP_400_BAD_REQUEST
             result = {"message":str(e)}
+            print(e)
         
         return Response(result, status=status_code)
 
 
 class LoginAPIView(APIView):
-
+    """
+    An endpoint for login.
+    """    
     def post(self, request):
 
+        data = {}
+
         try:
-            payload = Jwt_handler.decode(token=request.data['jwt'])
+            payload = request.jwt_data
             email = payload['email']
             password = payload['password']
 
             user = User.objects.filter(email=email).first()
 
             if user is None:
-                raise AuthenticationFailed('User not found!')
+                raise AuthenticationFailed(detail='User not found!',
+                code=status.HTTP_404_NOT_FOUND)
 
             if not user.check_password(password):
-                raise AuthenticationFailed('Incorrect password!')
+                raise AuthenticationFailed(detail='Incorrect password!',
+                code=status.HTTP_400_BAD_REQUEST)
 
             auth.login(request, user)
 
-            data = {
-                'message': "success"
-            }
+            if user.uauth.is_enabled:
+                data['required']="otp"
+                request.session["otp"] = "unverified"
+
+            data['message']= "success"
+
             status_code = status.HTTP_200_OK
 
-        except:
+        except Exception as e:
             data = {
                 'message': "somthing wrong"
             }
             status_code = status.HTTP_400_BAD_REQUEST
 
-        response = Jwt_handler.encode(data)
+        response = data
         return Response(response, status=status_code)
 
 
 class OtpRegVerificationAPIView(APIView):
-
+    """
+    An endpoint for very email otp code[register].
+    """    
+    permission_classes = (IsAuthenticated,)
+    # renderer_classes = [AlreadyJSONRenderer]
     def post(self, request):
 
-            u_otp = request.POST['otp']
-            otp = cache.get(f"{user.id}_reg_otp")
-            cache.delete(f"{user.id}_reg_otp")
-            if int(u_otp) == otp:
-                user = authenticate(request,username=username,password=password)
-                if user is not None:
-                    login(request,user)
-                    request.session.delete('login_otp')
-                    messages.success(request,'login successfully')
-                    return redirect('/')
-            else:
-                messages.error(request,'Wrong OTP')
-                
-            return Response(serializer.data)
+        if not request.user.is_email_verified:
+            try:
+                if Email.VerifyRegisterationOTP(request=request):
+                    user = request.user
+                    user.is_email_verified = True
+                    user.save()
+                    data = {
+                    'message': "Email successfully verified"
+                    }
+                    status_code = status.HTTP_200_OK
+
+                else:
+                    data = {
+                        'message': "Email not verified"
+                        }
+                    status_code = status.HTTP_400_BAD_REQUEST
+
+            except Exception as e:
+                data = {
+                        'message': "somthing wrong"
+                        }
+                status_code = status.HTTP_417_EXPECTATION_FAILED
+
+        else:
+            data = {
+                    'message': "Email verified"
+                        }
+            status_code = status.HTTP_400_BAD_REQUEST
+        response = data
+        return Response(response, status=status_code)
 
 
 class LogoutAPIView(APIView):
+    """
+    An endpoint for logout user.
+    """    
     def post(self, request):
         response = Response()
-        response.delete_cookie('jwt')
-        # auth.logout(request)
+        auth.logout(request)
         response.data = {
             'message': 'success'
         }
+        response.status = status.HTTP_200_OK
         return response
+
+
+
+class ChangePasswordAPIView(UpdateAPIView):
+        """
+        An endpoint for changing password.
+        """
+        serializer_class = ChangePasswordSerializer
+        model = User
+        permission_classes = (IsAuthenticated,)
+
+        def get_object(self, queryset=None):
+            obj = self.request.user
+            return obj
+
+        def update(self, request, *args, **kwargs):
+            self.user = self.get_object()
+            serializer = self.get_serializer(data=request.data)
+
+            if serializer.is_valid():
+                self.user.set_password(serializer.data.get("new_password"))
+                self.user.save()
+                data = {
+                    'status': 'success',
+                    'message': 'Password updated successfully',
+                }
+                
+                return Response(data, status=status.HTTP_200_OK)
+
+
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+class OauthAPIView(APIView):
+    """
+    An endpoint for verify otp code after login.
+    """    
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        print(request.jwt_data)
+        try:
+            # if request.session['otp'] == "unverified":
+                if Oauth_handler.verify_otp(request.user, request.jwt_data['otp']):
+                    
+                    request.session['otp'] = 'verified'
+                    data = {
+                    'message': "otp successfully verified"
+                    }
+                    status_code = status.HTTP_200_OK
+
+                else:
+                    data = {
+                        'message': "otp is incorrect!"
+                        }
+                    status_code = status.HTTP_401_UNAUTHORIZED
+
+            # data = {
+            #         'message': "somthing wrong"
+            #         }
+            # status_code = status.HTTP_417_EXPECTATION_FAILED
+
+        except Exception as e:
+            data = {
+                    'message': "otp error!"
+                    }
+            status_code = status.HTTP_417_EXPECTATION_FAILED
+            print(e)
+
+        response = data
+        return Response(response, status=status_code)

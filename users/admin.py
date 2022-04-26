@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, PersonalInfo
+from .models import CustomUser, PersonalInfo, OauthInfo
 
 
 class CustomUserAdmin(UserAdmin):
@@ -37,5 +37,12 @@ class PersonalInfoAdmin(admin.ModelAdmin):
     list_display = ('id', 'user','first_name', 'last_name', 'created_at')
     list_filter = ()
 
-
 admin.site.register(PersonalInfo, PersonalInfoAdmin)
+
+
+
+@admin.register(OauthInfo)
+class OautInfoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'secret', 'is_enabled','created_at')
+    list_filter = ('user',)
+    search_fields = ('id', 'user',)

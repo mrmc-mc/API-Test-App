@@ -1,10 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
-from django.contrib.sites.models import Site
-from .utils import EmailThread
+from .utils import Email, Oauth_handler
 from django.conf import settings
-from random import randrange
-from django.core.cache import cache
+from .models import OauthInfo
 
 def create_group(sender, **kwargs):
     from django.contrib.auth import get_user_model
@@ -41,23 +39,26 @@ def sendOTP_after_registration(sender, instance, created, **kwargs):
 
     if created:
         try:
-            user = instance
-            otp = randrange(100000,999999)
-            cache.set(f"{user.id}_reg_otp", "value", timeout=3600*24*7)
-            subject = "ایمیل فعالسازی حساب"
-            # email_template_name = "email/auth_email_verify.html"
-            index = {
-                        "email": user.email,
-                    "text":f"TOPKENZ.COM: Your OTP code is: {otp}"
-                }
-        # body = render_to_string(email_template_name, index)
-        
-            EmailThread(subject= subject,
-                        body=index,
-                        sender=settings.DEFAULT_FROM_EMAIL,
-                        email= [user.email]).start()
-
-        # except BadHeaderError:
-        #     pass
+            Email.SendRegisterationOTP(instance=instance)
+            return True
+            print("*"*90)
         except:
-            pass
+            print("-"*90)
+            print(e)
+            print("-"*90)
+
+
+def OauthGenerator(sender, instance, created, **kwargs):
+    """ Generate secret and uri Auth for user """
+
+    if created:
+        try:
+            secret = Oauth_handler.generate_secret()
+            uri = Oauth_handler.generate_uri(instance=instance,secret=secret)
+            auth = OauthInfo.objects.create(user=instance,secret=secret, uri=uri)
+            auth.save()
+            print(auth)
+        except Exception as e:
+            print("="*90)
+            print(e)
+            print("="*90)
