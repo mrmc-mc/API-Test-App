@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     # Third-party APPS
-    'captcha',
     'rest_framework',
     'corsheaders',
 
