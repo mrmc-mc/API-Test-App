@@ -1,24 +1,26 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
-from .utils import Email, Oauth_handler
-from django.conf import settings
+
 from .models import OauthInfo
+from .utils import Email, Oauth_handler
+
 
 def create_group(sender, **kwargs):
     from django.contrib.auth import get_user_model
     User = get_user_model()
-    from django.contrib.auth.models import Group
-    from django.contrib.auth.models import Permission
+    from django.contrib.auth.models import Group, Permission
 
-    ngp_list = ['registered_group','verified_group','level2_group' , "blocked_group"]
+    ngp_list = ['registered_group', 'verified_group',
+                'level2_group', "blocked_group"]
 
-    ngp_perm = {'registered_group':["user_wait_for_verify"], "verified_group":["user_verified"],
-                 "blocked_group":["user_blocked"] ,
-                 "level2_group":["user_verified","user_level_2"]}
+    ngp_perm = {'registered_group': ["user_wait_for_verify"], "verified_group": ["user_verified"],
+                "blocked_group": ["user_blocked"],
+                "level2_group": ["user_verified", "user_level_2"]}
 
     current_group = Group.objects.all()
 
-    cgp_list = [ gp.name for gp in current_group]
+    cgp_list = [gp.name for gp in current_group]
 
     for newgp in ngp_list:
 
@@ -30,8 +32,6 @@ def create_group(sender, **kwargs):
                 new_group.permissions.add(perms)
 
             new_group.save()
-
-
 
 
 def sendOTP_after_registration(sender, instance, created, **kwargs):
@@ -54,8 +54,9 @@ def OauthGenerator(sender, instance, created, **kwargs):
     if created:
         try:
             secret = Oauth_handler.generate_secret()
-            uri = Oauth_handler.generate_uri(instance=instance,secret=secret)
-            auth = OauthInfo.objects.create(user=instance,secret=secret, uri=uri)
+            uri = Oauth_handler.generate_uri(instance=instance, secret=secret)
+            auth = OauthInfo.objects.create(
+                user=instance, secret=secret, uri=uri)
             auth.save()
             print(auth)
         except Exception as e:

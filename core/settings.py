@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['*',] # TODO: config('ALLOWED_HOSTS')
+ALLOWED_HOSTS = ['*', ]  # TODO: config('ALLOWED_HOSTS')
 
 
 # Application definition
@@ -41,13 +41,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
-    #Third-party APPS
+    # Third-party APPS
     'captcha',
     'rest_framework',
     'corsheaders',
 
-    #Local APPs
+    # Local APPs
     'users.apps.UsersConfig',
+    'coins.apps.CoinsConfig',
 ]
 
 # THIRD_PARTY_APPS = [
@@ -69,7 +70,7 @@ MIDDLEWARE = [
     'users.middlewares.JwtToDataMiddleware',
     'users.middlewares.DataToJwtMiddleware',
     'users.middlewares.ActiveEmailMiddleware',
-    'users.middlewares.OauthMiddleware',
+    # 'users.middlewares.OauthMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -140,7 +141,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # Default primary key field type
@@ -149,7 +150,7 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#Email Settings
+# Email Settings
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD = 'localhost', 1025, None, None
@@ -165,18 +166,16 @@ DEFAULT_FROM_EMAIL = 'example@gmail.com'
 # SERVER_EMAIL = config('SERVER_EMAIL')
 
 
-
 # Captcha Keys
 RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
 
-#Custom User Model
+# Custom User Model
 AUTH_USER_MODEL = 'users.CustomUser'
 
 
-
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1','http://*127.0.0.1',"http://*","moz-extension://e4c56056-eb55-4970-8a8b-f8bf40226a4d"]
-
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1', 'http://*127.0.0.1',
+                        "http://*", "moz-extension://e4c56056-eb55-4970-8a8b-f8bf40226a4d"]
 
 
 CACHES = {
@@ -187,4 +186,15 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
+}
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ]
 }
