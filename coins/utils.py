@@ -3,7 +3,6 @@ from decimal import Decimal
 
 
 def SplitPairs(pairs):
-
     sell = re.search(r'^(\w+)(IRT|USDT)$', pairs.upper())
     buy = re.search(r'^(IRT|USDT)(\w+)$', pairs.upper())
     if sell or buy:

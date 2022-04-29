@@ -111,10 +111,10 @@ class DataToJwtMiddleware:
         response = self.get_response(request)
 
         if hasattr(response, 'data'):
-            _data = response.data
-            response.data = Jwt_handler.encode(_data)
-            response.content = [json.dumps({"jwt":(response.data)},
-                                indent=8, sort_keys=True,default=DjangoJSONEncoder)]
+            _data = json.dumps({"jwt":(Jwt_handler.encode(response.data))},
+                                indent=8, sort_keys=True,default=DjangoJSONEncoder)
+            response.data = _data
+            response.content = [_data]
 
         return response
 
@@ -130,8 +130,8 @@ class JwtToDataMiddleware:
         if request.method != "GET":
             if hasattr(request, 'body'):
                 if b'jwt' in request.body:
-                    __token = json.loads(request.body)["jwt"]
-                    request.jwt_data = Jwt_handler.decode(token=__token)
+                    __token = Jwt_handler.decode(json.loads(request.body)["jwt"])
+                    request.jwt_data = __token
                     # if request.jwt_data == None:
                     #     return DATA_ERROR
 

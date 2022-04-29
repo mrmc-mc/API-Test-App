@@ -58,14 +58,14 @@ class UserSerializer(serializers.ModelSerializer):
 class PersonalInfoSerializer(serializers.ModelSerializer):
 
     # user = UserSerializer(read_only=True)
-    user = serializers.RelatedField(read_only=True)
+    user = UserSerializer(read_only=True, many=False)
 
     class Meta:
         model = PersonalInfo
         fields = ['first_name', 'last_name', 'national_code', 'user']
 
     def create(self, validated_data):
-        validated_data['user'] = self.user
+        # validated_data['user'] = self.user
 
         return super().create(validated_data)
 
