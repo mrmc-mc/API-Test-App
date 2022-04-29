@@ -11,8 +11,7 @@ class TradeAPIView(CreateAPIView):
     serializer_class = TransactionSerializer
 
     def create(self, request, *args, **kwargs):
-        __data = request.jwt_data
-        serializer = self.get_serializer(data=__data)
+        serializer = self.get_serializer(data=request.jwt_data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         print(serializer.data)
