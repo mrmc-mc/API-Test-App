@@ -109,7 +109,7 @@ class UserActiveMiddleware:
                         data={
                             "jwt": Jwt_handler.encode({"message": "your account is limited!"})
                         },
-                        status=status.HTTP_401_UNAUTHORIZED,
+                        status=status.HTTP_403_FORBIDDEN,
                     )
         else:
             return response
