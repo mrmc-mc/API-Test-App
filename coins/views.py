@@ -14,7 +14,6 @@ class TradeAPIView(CreateAPIView):
         serializer = self.get_serializer(data=request.jwt_data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        print(serializer.data)
         # headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     

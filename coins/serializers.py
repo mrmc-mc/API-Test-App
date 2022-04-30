@@ -67,8 +67,6 @@ class TransactionSerializer(serializers.ModelSerializer):
         if not attrs:
             raise serializers.ValidationError({"coin_out": "incorrect coin to sell!"})
 
-        if attrs.balance < 5:
-            raise serializers.ValidationError({"balance": "Insufficient Balance!"})
 
         return attrs
 
@@ -77,8 +75,15 @@ class TransactionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"amount": "Amount Lower than minimum amount!"}
             )
+            
+        if attrs > self.context["request"].user.uwallet.get(uid=self.initial_data['coin_out']).balance:
+            raise serializers.ValidationError(
+                {"amount": "Amount Higher than balance!"}
+            )
 
         return attrs
+
+
 
     def create(self, validated_data):
         try:
@@ -91,9 +96,10 @@ class TransactionSerializer(serializers.ModelSerializer):
                 F("balance") - validated_data["amount"]
             )
             (validated_data["coin_out"]).save()
-        
-        except Exception as e:
-            raise serializers.ValidationError({"error": "Something went wrong!"})
+
+            validated_data['status'] = 'paid'
+        except Exception:
+            raise serializers.ValidationError({"error": "Something went wrong! Cant create Transaction"})
             
         finally:
             close_old_connections()
