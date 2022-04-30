@@ -21,7 +21,7 @@ class CustomUser(AbstractUser):
         verbose_name="Mobile Verification Status", default=False)
     is_email_verified = models.BooleanField(
         verbose_name="Email Verification Status", default=False)
-    can_trade = models.BooleanField(verbose_name="User Status", default=False)
+    can_trade = models.BooleanField(verbose_name="User Status", default=True)
     image_file = models.FileField(
         verbose_name="Profile Image", upload_to=user_upload_dir, max_length=None)
     ref_code = models.CharField(

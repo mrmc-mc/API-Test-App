@@ -95,6 +95,26 @@ class OauthMiddleware:
             return response
 
 
+class UserActiveMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+
+        response = self.get_response(request)
+
+        if request.user.is_authenticated and not request.user.uauth.can_trade:
+
+                    return JsonResponse(
+                        data={
+                            "jwt": Jwt_handler.encode({"message": "your account is limited!"})
+                        },
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+        else:
+            return response
+
+
 class DataToJwtMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
