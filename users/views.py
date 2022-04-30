@@ -51,7 +51,7 @@ class RegisterAPIView(APIView):  # Can use rest_framework.generics.ListCreateAPI
             result["media"] = media_serializer.data
 
         except Exception as e:
-            if user:
+            if "user" in locals():
                 user.delete()
 
             status_code = status.HTTP_400_BAD_REQUEST
