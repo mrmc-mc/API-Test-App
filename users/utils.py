@@ -6,6 +6,7 @@ import jwt
 import pyotp
 from django.conf import settings
 from django.contrib.sites.models import Site
+
 # from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import cache
 from django.core.mail import send_mail
@@ -28,14 +29,8 @@ class Jwt_handler:
 
     @staticmethod
     def decode(token):
-        try:
-            payload = jwt.decode(
-                jwt=token, key=settings.SECRET_KEY, algorithms=["HS256"]
-            )
-            return payload
-        # except jwt.exceptions.InvalidSignatureError as e:
-        except Exception as e:
-            print(f"Erorr: {e}")
+        payload = jwt.decode(jwt=token, key=settings.SECRET_KEY, algorithms=["HS256"])
+        return payload
 
 
 class EmailThread(threading.Thread):
