@@ -26,13 +26,9 @@ class CustomUserAdmin(UserAdmin):
                 "fields": (
                     "email",
                     "phone",
-                    "first_name",
-                    "last_name",
-                    "national_code",
                     "is_phone_verified",
                     "is_email_verified",
                     "can_trade",
-                    "image_file",
                     "ref_code",
                 )
             },

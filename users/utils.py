@@ -16,7 +16,7 @@ from django.template.loader import render_to_string
 def user_upload_dir(instance, filename):
     """set upload directroy by user id and change file name"""
 
-    return f"user_{instance.national_code}/{filename}"
+    return f"user_{instance.user.uinfo.national_code}/{filename}"
 
 
 class Jwt_handler:
