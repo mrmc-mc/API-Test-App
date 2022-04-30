@@ -7,8 +7,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# from  rest_framework.generics import ListCreateAPIView
-
 from .serializers import (
     ChangePasswordSerializer,
     PersonalInfoSerializer,
@@ -16,6 +14,9 @@ from .serializers import (
     UserSerializer,
 )
 from .utils import Email, Oauth_handler
+
+# from  rest_framework.generics import ListCreateAPIView
+
 
 User = get_user_model()
 
@@ -33,8 +34,8 @@ class RegisterAPIView(APIView):  # Can use rest_framework.generics.ListCreateAPI
             user_serializer = UserSerializer(data=reg_data)
             if user_serializer.is_valid(raise_exception=True):
                 user = user_serializer.save()
-                
-            reg_data['user'] = user.pk
+
+            reg_data["user"] = user.pk
             info_serializer = PersonalInfoSerializer(data=reg_data)
             info_serializer.is_valid(raise_exception=True)
             info_serializer.save()
@@ -42,7 +43,7 @@ class RegisterAPIView(APIView):  # Can use rest_framework.generics.ListCreateAPI
             media_serializer = UserMediaSerializer(data=reg_data)
             media_serializer.is_valid(raise_exception=True)
             media_serializer.save()
-                
+
             status_code = status.HTTP_201_CREATED
             result = {}
             result["info"] = info_serializer.data
@@ -52,7 +53,7 @@ class RegisterAPIView(APIView):  # Can use rest_framework.generics.ListCreateAPI
         except Exception as e:
             if user:
                 user.delete()
-                
+
             status_code = status.HTTP_400_BAD_REQUEST
             result = {"message": str(e)}
 
