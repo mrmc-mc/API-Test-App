@@ -1,11 +1,5 @@
-import datetime
-
-from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
-from django.core.files.base import ContentFile
-from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.generics import UpdateAPIView
@@ -18,7 +12,7 @@ from .serializers import (
     PersonalInfoSerializer,
     UserSerializer,
 )
-from .utils import Email, Jwt_handler, Oauth_handler
+from .utils import Email, Oauth_handler
 
 User = get_user_model()
 
