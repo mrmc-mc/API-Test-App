@@ -1,3 +1,4 @@
+from statistics import mode
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -79,6 +80,7 @@ class PersonalInfoAdmin(admin.ModelAdmin):
 
 @admin.register(OauthInfo)
 class OautInfoAdmin(admin.ModelAdmin):
+    model = OauthInfo
     list_display = ("id", "user", "secret", "is_enabled", "created_at")
     list_filter = ("user",)
     search_fields = (
