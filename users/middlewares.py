@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
 from django.shortcuts import reverse
-from jwt.exceptions import InvalidSignatureError
+from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from rest_framework import status
 from rest_framework.exceptions import NotAcceptable
 from rest_framework.response import Response
@@ -131,7 +131,7 @@ class JwtToDataMiddleware:
                         __token = Jwt_handler.decode(json.loads(request.body)["jwt"])
                         request.jwt_data = __token
 
-                    except InvalidSignatureError:
+                    except InvalidSignatureError or ExpiredSignatureError:
                         
                         return JsonResponse(
                             data={
