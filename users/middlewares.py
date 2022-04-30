@@ -5,11 +5,9 @@ from django.http import JsonResponse
 from django.shortcuts import reverse
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from rest_framework import status
-from rest_framework.exceptions import NotAcceptable
-from rest_framework.response import Response
 from rest_framework.utils import json
 
-from .errors import DATA_ERROR, MIDDLEWARE_ERROR, OAUTH_ERROR
+from .errors import OAUTH_ERROR
 from .utils import Email, Jwt_handler
 
 User = get_user_model()
