@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 help.txt
+.trunk/trunk.yaml
+.markdownlint.yaml
+.isort.cfg
