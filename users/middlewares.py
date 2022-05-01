@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
 from django.shortcuts import reverse
-from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
+from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
 from rest_framework import status
 from rest_framework.utils import json
 
@@ -103,14 +103,14 @@ class UserActiveMiddleware:
 
         response = self.get_response(request)
 
-        if request.user.is_authenticated and not request.user.uauth.can_trade:
+        if request.user.is_authenticated and not request.user.uauth.is_active:
 
-                    return JsonResponse(
-                        data={
-                            "jwt": Jwt_handler.encode({"message": "your account is limited!"})
-                        },
-                        status=status.HTTP_403_FORBIDDEN,
-                    )
+            return JsonResponse(
+                data={
+                    "jwt": Jwt_handler.encode({"message": "your account is limited!"})
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
         else:
             return response
 
@@ -150,7 +150,7 @@ class JwtToDataMiddleware:
                         request.jwt_data = __token
 
                     except InvalidSignatureError or ExpiredSignatureError:
-                        
+
                         return JsonResponse(
                             data={
                                 "jwt": Jwt_handler.encode(
