@@ -6,6 +6,8 @@ from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
+from django.contrib.auth.models import Group
 
 from .serializers import (
     ChangePasswordSerializer,
@@ -34,6 +36,8 @@ class RegisterAPIView(APIView):  # Can use rest_framework.generics.ListCreateAPI
             user_serializer = UserSerializer(data=reg_data)
             if user_serializer.is_valid(raise_exception=True):
                 user = user_serializer.save()
+                group = Group.objects.get(name='registered_group')
+                user.groups.add(group)
 
             reg_data["user"] = user.pk
             info_serializer = PersonalInfoSerializer(data=reg_data)
@@ -214,3 +218,13 @@ class OauthAPIView(APIView):
 
         response = data
         return Response(response, status=status_code)
+
+
+class UserListAPIView(ListAPIView):
+    """
+    An endpoint for listing all users.
+    """
+
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
