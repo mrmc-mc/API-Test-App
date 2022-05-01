@@ -1,16 +1,16 @@
+import base64
+import io
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
+from django.core.validators import validate_email
 from django.utils.timezone import now
+from PIL import Image
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from django.contrib.auth.password_validation import validate_password
-from django.core.validators import validate_email
-from .models import PersonalInfo, UserMedia
-import base64
-import io
-from PIL import Image
 
+from .models import PersonalInfo, UserMedia
 
 User = get_user_model()
 
@@ -46,38 +46,37 @@ class UserSerializer(serializers.ModelSerializer):
         return attrs
 
     def validate_password(self, attrs):
-        
+
         if len(attrs) < 8:
             raise serializers.ValidationError(
                 ("This password must contain at least 8 characters."),
-                code='password_too_short',
+                code="password_too_short",
             )
-            
+
         validate_password(attrs)
-        
+
         return attrs
-    
-    
+
     def validate_email(self, attrs):
         validate_email(attrs)
         return attrs
 
     def validate_phone(self, attrs):
-        
+
         if not attrs.isdigit():
             raise serializers.ValidationError(
                 {"phone": "Phone number must be digits only."}
             )
-        
+
         if not attrs.startswith("09"):
             raise serializers.ValidationError(
                 {"phone": "Phone number must start with 09XXXXXXXX."}
             )
-        
+
         if len(attrs) != 11:
             raise serializers.ValidationError(
                 ("This phone number must contain exactly 11 digits."),
-                code='phone_number_invalid',
+                code="phone_number_invalid",
             )
         return attrs
 
@@ -88,36 +87,33 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-
 class UserMediaSerializer(serializers.ModelSerializer):
-    
+
     image_file = serializers.CharField(required=True)
+
     class Meta:
         model = UserMedia
         fields = fields = ["image_file", "user"]
         extra_kwargs = {
             "user": {"write_only": True},
         }
-        
+
     def validate_image_file(self, attrs):
-        
+
         if not attrs.startswith("data:image"):
-            raise serializers.ValidationError(
-                {"image_file": "Invalid image format."}
-            ) 
+            raise serializers.ValidationError({"image_file": "Invalid image format."})
         try:
             image = base64.b64decode(attrs.split(",")[1])
             img = Image.open(io.BytesIO(image))
         except Exception:
-                raise serializers.ValidationError(
-                {"image_file": 'file is not valid base64 image'})
-
-            
+            raise serializers.ValidationError(
+                {"image_file": "file is not valid base64 image"}
+            )
 
         if img.format.lower() not in ["jpg", "jpeg", "png"]:
             raise serializers.ValidationError(
-                {"image_file": "Invalid image file format."})
-
+                {"image_file": "Invalid image file format."}
+            )
 
         # width, height = img.size
         # if  not width < 800 and height < 800:
@@ -127,7 +123,7 @@ class UserMediaSerializer(serializers.ModelSerializer):
         return attrs
 
     def save(self, *args, **kwargs):
-        
+
         # if isinstance(data, basestring) and data.startswith('data:image'):
         kwargs["image_file"] = ContentFile(
             self.validated_data["image_file"],
@@ -137,52 +133,48 @@ class UserMediaSerializer(serializers.ModelSerializer):
 
 
 class PersonalInfoSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = PersonalInfo
         fields = ["first_name", "last_name", "national_code", "user"]
-        
+
     def validate_first_name(self, attrs):
         if len(attrs) < 2:
             raise serializers.ValidationError(
                 ("This first name must contain at least 2 characters."),
-                code='first_name_too_short',
+                code="first_name_too_short",
             )
-        
-    
+
         if not attrs.isalpha():
             raise serializers.ValidationError(
                 {"first_name": "First name must be alphabetic only."}
             )
-        
-        return attrs
 
+        return attrs
 
     def validate_last_name(self, attrs):
         if len(attrs) < 2:
             raise serializers.ValidationError(
                 ("This last name must contain at least 2 characters."),
-                code='last_name_too_short',
+                code="last_name_too_short",
             )
-        
-    
+
         if not attrs.isalpha():
             raise serializers.ValidationError(
                 {"last_name": "Last name must be alphabetic only."}
             )
-        
+
         return attrs
-    
+
     def validate_national_code(self, attrs):
         if not attrs.isdigit():
             raise serializers.ValidationError(
                 {"national_code": "National code must be digits only."}
             )
-        
+
         if len(attrs) != 10:
             raise serializers.ValidationError(
                 ("This national code must contain exactly 10 digits."),
-                code='national_code_invalid',
+                code="national_code_invalid",
             )
         return attrs
 
@@ -194,10 +186,10 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
     """
     Serializer for password change endpoint.
     """
+
     class Meta:
         model = User
         fields = ["new_password", "old_password"]
-
 
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
@@ -219,14 +211,14 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         return attrs
 
     def validate_new_password(self, attrs):
-        
+
         if len(attrs) < 8:
             raise serializers.ValidationError(
                 ("This password must contain at least %(min_length)d characters."),
-                code='password_too_short',
-                params={'min_length': 8},
+                code="password_too_short",
+                params={"min_length": 8},
             )
-            
+
         validate_password(attrs)
         return attrs
 

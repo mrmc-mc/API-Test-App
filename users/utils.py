@@ -24,7 +24,7 @@ class Jwt_handler:
 
     @staticmethod
     def encode(payload):
-        token = jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
+        token = jwt.encode(payload={'data':payload}, key=settings.SECRET_KEY, algorithm="HS256")
         return token
 
     @staticmethod

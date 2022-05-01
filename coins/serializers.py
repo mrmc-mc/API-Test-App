@@ -1,10 +1,13 @@
+from symtable import Symbol
 from django.contrib.auth import get_user_model
 from django.db import close_old_connections
 from django.db.models import F
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from .models import Transaction
+import coins
+
+from .models import Transaction, UserWallet, Coin
 from .utils import SplitPairs
 
 User = get_user_model()
@@ -107,3 +110,41 @@ class TransactionSerializer(serializers.ModelSerializer):
             close_old_connections()
 
         return super().create(validated_data)
+
+
+
+class CoinSerializer(serializers.ModelSerializer):
+    """
+    This is a serializer for the Coin model.
+    """
+
+    class Meta:
+        model = Coin
+        fields = ["coin", "symbol", "lowprice", "highprice"]
+
+
+
+
+class UserWalletSerializer(serializers.ModelSerializer):
+    """
+    This is a serializer for the UserWallet model.
+    """
+    # coin = CoinSerializer(read_only=True)
+    coin = serializers.PrimaryKeyRelatedField(read_only=True, source="coin.coin")
+    symbol = serializers.PrimaryKeyRelatedField(read_only=True, source="coin.symbol")
+    
+    class Meta:
+        model = UserWallet
+        fields = (
+            # "user",
+            "coin",
+            'symbol',
+            "balance",
+        )
+        extra_kwargs = {
+            # "user": {"read_only": True},
+            "coin": {'read_only': True},
+            "balance": {"read_only": True},
+            "symbol": {"read_only": True},
+        }
+        
