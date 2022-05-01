@@ -9,7 +9,7 @@ from .serializers import TransactionSerializer
 
 class TradeAPIView(CreateAPIView):
     '''
-        an endpoint for crreating a new transaction
+        An endpoint for crreating a new transaction
     '''
     permission_classes = [AllowAny]  # [IsAuthenticated, TradePermission]
     serializer_class = TransactionSerializer
