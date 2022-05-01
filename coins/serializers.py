@@ -11,9 +11,9 @@ User = get_user_model()
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    '''
+    """
     This is a serializer for the Transaction model. validate data and create a new transaction.
-    '''
+    """
 
     coin_pairs = serializers.CharField(required=True)
     get_amount = serializers.FloatField()
@@ -67,7 +67,6 @@ class TransactionSerializer(serializers.ModelSerializer):
         if not attrs:
             raise serializers.ValidationError({"coin_out": "incorrect coin to sell!"})
 
-
         return attrs
 
     def validate_amount(self, attrs):
@@ -75,15 +74,16 @@ class TransactionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"amount": "Amount Lower than minimum amount!"}
             )
-            
-        if attrs > self.context["request"].user.uwallet.get(uid=self.initial_data['coin_out']).balance:
-            raise serializers.ValidationError(
-                {"amount": "Amount Higher than balance!"}
-            )
+
+        if (
+            attrs
+            > self.context["request"]
+            .user.uwallet.get(uid=self.initial_data["coin_out"])
+            .balance
+        ):
+            raise serializers.ValidationError({"amount": "Amount Higher than balance!"})
 
         return attrs
-
-
 
     def create(self, validated_data):
         try:
@@ -91,16 +91,18 @@ class TransactionSerializer(serializers.ModelSerializer):
                 F("balance") + validated_data["get_amount"]
             )
             (validated_data["coin_in"]).save()
-            
+
             (validated_data["coin_out"]).balance = (
                 F("balance") - validated_data["amount"]
             )
             (validated_data["coin_out"]).save()
 
-            validated_data['status'] = 'paid'
+            validated_data["status"] = "paid"
         except Exception:
-            raise serializers.ValidationError({"error": "Something went wrong! Cant create Transaction"})
-            
+            raise serializers.ValidationError(
+                {"error": "Something went wrong! Cant create Transaction"}
+            )
+
         finally:
             close_old_connections()
 
