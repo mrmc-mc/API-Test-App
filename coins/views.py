@@ -1,7 +1,9 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from .permissions import TradePermission
 from .serializers import TransactionSerializer, UserWalletSerializer
@@ -23,20 +25,30 @@ class TradeAPIView(CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class UserWalletAPIView(ListAPIView):
+class UserWalletAPIView(ReadOnlyModelViewSet):
     """
     An endpoint for retrieving a user's wallet
     """
-    
-    permission_classes = [AllowAny] #[IsAuthenticated]
+
+    permission_classes = [AllowAny]  # [IsAuthenticated]
     serializer_class = UserWalletSerializer
-    
+
     def get_queryset(self):
         return self.request.user.uwallet.all()
 
-    # def get_object(self):
-    #     return self.request.user
+    def get_object(self):
+        return self.request.user.uwallet.get(
+            coin__symbol=(self.request.jwt_data["symbol"]).upper()
+        )
 
-    # def retrieve(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(self.get_object())
-    #     return Response(serializer.data)
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            data = serializer.data
+            code_status = status.HTTP_200_OK
+        except ObjectDoesNotExist:
+            data = {"message": "incorrect symbol!"}
+            code_status = status.HTTP_404_NOT_FOUND
+
+        return Response(data=data, status=code_status)

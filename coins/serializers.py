@@ -132,7 +132,7 @@ class UserWalletSerializer(serializers.ModelSerializer):
     # coin = CoinSerializer(read_only=True)
     coin = serializers.PrimaryKeyRelatedField(read_only=True, source="coin.coin")
     symbol = serializers.PrimaryKeyRelatedField(read_only=True, source="coin.symbol")
-    
+        
     class Meta:
         model = UserWallet
         fields = (

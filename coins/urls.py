@@ -7,6 +7,6 @@ app_name = 'coins'
 
 urlpatterns = [
     path("trade/", TradeAPIView.as_view(), name="trade"),
-    path("wallet/", UserWalletAPIView.as_view(), name="wallet"),
+    path("wallet/", UserWalletAPIView.as_view({'get': 'list','post':'retrieve'}), name="wallet"),
 
 ]
