@@ -1,13 +1,17 @@
 from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
+from .permissions import TradePermission
 from .serializers import TransactionSerializer
 
+
 class TradeAPIView(CreateAPIView):
-    
-    permission_classes = [AllowAny] #IsAuthenticated
+    '''
+        an endpoint for crreating a new transaction
+    '''
+    permission_classes = [AllowAny]  # [IsAuthenticated, TradePermission]
     serializer_class = TransactionSerializer
 
     def create(self, request, *args, **kwargs):
@@ -16,5 +20,3 @@ class TradeAPIView(CreateAPIView):
         self.perform_create(serializer)
         # headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    
