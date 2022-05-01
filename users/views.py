@@ -134,8 +134,8 @@ class OtpRegVerificationAPIView(APIView):
         else:
             data = {"message": "Email verified"}
             status_code = status.HTTP_400_BAD_REQUEST
-        ChangePasswordSerializerresponse = data
-        return Response(response, status=status_code)
+
+        return Response(data=data, status=status_code)
 
 
 class LogoutAPIView(APIView):
