@@ -256,3 +256,24 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    
+    first_name = serializers.PrimaryKeyRelatedField(read_only=True,source="uinfo.first_name")
+    last_name = serializers.PrimaryKeyRelatedField(read_only=True,source="uinfo.last_name")
+    national_code = serializers.PrimaryKeyRelatedField(read_only=True,source="uinfo.national_code")
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "phone",
+            "is_phone_verified",
+            "is_email_verified",
+            "can_trade",
+            "ref_code",
+            "first_name",
+            "last_name",
+            "national_code",
+        ]

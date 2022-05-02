@@ -8,10 +8,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from django.contrib.auth.models import Group
-
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from .serializers import (
     ChangePasswordSerializer,
     PersonalInfoSerializer,
+    UserListSerializer,
     UserMediaSerializer,
     UserSerializer,
 )
@@ -225,6 +227,21 @@ class UserListAPIView(ListAPIView):
     An endpoint for listing all users.
     """
 
-    serializer_class = UserSerializer
+    serializer_class = UserListSerializer
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
+    
+    search_fields = ['phone', 'email', 'first_name', 'last_name', 'national_code', 'can_trade']
+    
+    def post(self, request, *args, **kwargs):
+        queryset = self.queryset
+        filter_params = None
+        filter_backends = [filters.SearchFilter]
+        if hasattr(request.jwt_data, 'filter'):
+            filter_params = request.jwt_data['filter']
+        if filter_params:
+            queryfilter = self.filter_class(filter_params, queryset=queryset)
+            queryset = queryfilter.qs
+        
+        serializer = self.get_pagination_serializer(page)
+        return Response(serializer.data)
