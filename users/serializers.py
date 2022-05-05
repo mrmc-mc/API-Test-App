@@ -259,10 +259,17 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 
 class UserListSerializer(serializers.ModelSerializer):
-    
-    first_name = serializers.PrimaryKeyRelatedField(read_only=True,source="uinfo.first_name")
-    last_name = serializers.PrimaryKeyRelatedField(read_only=True,source="uinfo.last_name")
-    national_code = serializers.PrimaryKeyRelatedField(read_only=True,source="uinfo.national_code")
+
+    first_name = serializers.PrimaryKeyRelatedField(
+        read_only=True, source="uinfo.first_name"
+    )
+    last_name = serializers.PrimaryKeyRelatedField(
+        read_only=True, source="uinfo.last_name"
+    )
+    national_code = serializers.PrimaryKeyRelatedField(
+        read_only=True, source="uinfo.national_code"
+    )
+
     class Meta:
         model = User
         fields = [
