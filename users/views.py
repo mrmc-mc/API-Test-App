@@ -10,7 +10,6 @@ from rest_framework.views import APIView
 
 from .filters import JWTBaseSearchFilter
 from .paginators import UserListSetPagination
-
 from .serializers import (
     ChangePasswordSerializer,
     PersonalInfoSerializer,
@@ -227,40 +226,15 @@ class UserListAPIView(ListAPIView):
     """
     An endpoint for listing all users.
     """
-    
+
     serializer_class = UserListSerializer
     permission_classes = (IsAuthenticated,)
 
     # pagination_class = UserListSetPagination
 
-
-
     def get_queryset(self):
         return User.objects.all()
 
-
-    # def post(self, request, *args, **kwargs):
-    #     print(request.jwt_data["filter"])
-    #     try:
-    #         queryset = self.get_queryset()
-    #         filter_params = None
-            
-    #         if 'filter' in request.jwt_data:
-    #             filter_params = request.jwt_data["filter"]
-    #             print(filter_params)
-    #         if filter_params:
-    #             queryfilter = self.filterset_class(filter_params, queryset=queryset)
-    #             queryset = queryfilter.qs
-
-    #         serializer = self.serializer_class(queryset, many=True)
-    #         data = serializer.data
-    #         status_code = status.HTTP_200_OK
-    #     except KeyError:
-    #         data = {"message": "Invalid data!"}
-    #         status_code = status.HTTP_400_BAD_REQUEST
-            
-    #     return Response(data=data, status=status_code)
-    
     def post(self, request, *args, **kwargs):
         self.filter_backends = [JWTBaseSearchFilter]
         self.search_fields = [
@@ -270,7 +244,7 @@ class UserListAPIView(ListAPIView):
             "uinfo__last_name",
             "uinfo__national_code",
             "can_trade",
-            ]
-        params = request.jwt_data.get('search', '')
+        ]
+        params = request.jwt_data.get("search", "")
         print(params)
         return self.list(request, *args, **kwargs)
