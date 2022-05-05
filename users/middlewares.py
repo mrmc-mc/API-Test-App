@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
 from django.shortcuts import reverse
-from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
+from jwt.exceptions import DecodeError, ExpiredSignatureError, InvalidSignatureError
 from rest_framework import status
 from rest_framework.utils import json
 
@@ -22,6 +22,8 @@ EMAIL_UNVERIFIED_EXCLUDE_PATH = [
 OAUTH_EXCLUDE_PATH = [
     reverse("users:otp-verify"),
 ]
+
+ADMIN_EXCLUDE_PATH = "/admin/"
 
 
 class ActiveEmailMiddleware:
@@ -112,7 +114,7 @@ class UserActiveMiddleware:
                 status=status.HTTP_403_FORBIDDEN,
             )
         else:
-            return response
+            return responseException
 
 
 class DataToJwtMiddleware:
@@ -142,23 +144,41 @@ class JwtToDataMiddleware:
 
     def __call__(self, request):
 
-        if request.method != "GET":
+        if request.method != "GET" and ADMIN_EXCLUDE_PATH not in request.path:
+            # request.jwt_data = None
             if hasattr(request, "body"):
                 if b"jwt" in request.body:
                     try:
-                        __token = Jwt_handler.decode(json.loads(request.body)["jwt"])
-                        request.jwt_data = __token
+                        request.jwt_data = Jwt_handler.decode(
+                            json.loads(request.body)["jwt"]
+                        )
 
                     except InvalidSignatureError or ExpiredSignatureError:
 
                         return JsonResponse(
                             data={
                                 "jwt": Jwt_handler.encode(
-                                    {"error": "Signature verification failed!"}
+                                    {"message": "Signature verification failed!"}
                                 )
                             },
                             status=status.HTTP_401_UNAUTHORIZED,
                         )
+
+                    except DecodeError:
+                        return JsonResponse(
+                            data={
+                                "jwt": Jwt_handler.encode({"message": "Invalid token!"})
+                            },
+                            status=status.HTTP_406_NOT_ACCEPTABLE,
+                        )
+
+                else:
+                    return JsonResponse(
+                        data={
+                            "jwt": Jwt_handler.encode({"message": "Invalid JWT data!"})
+                        },
+                        status=status.HTTP_406_NOT_ACCEPTABLE,
+                    )
 
         response = self.get_response(request)
 
