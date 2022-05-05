@@ -19,13 +19,13 @@ from .serializers import (
 )
 from .utils import Email, Oauth_handler
 
-# from  rest_framework.generics import ListCreateAPIView
+
 
 
 User = get_user_model()
 
 
-class RegisterAPIView(APIView):  # Can use rest_framework.generics.ListCreateAPIView
+class RegisterAPIView(APIView):
     """
     An endpoint for register user.
     """
