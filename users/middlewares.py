@@ -114,7 +114,7 @@ class UserActiveMiddleware:
                 status=status.HTTP_403_FORBIDDEN,
             )
         else:
-            return responseException
+            return response
 
 
 class DataToJwtMiddleware:
