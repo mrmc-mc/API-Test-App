@@ -19,9 +19,6 @@ from .serializers import (
 )
 from .utils import Email, Oauth_handler
 
-
-
-
 User = get_user_model()
 
 
