@@ -146,7 +146,7 @@ class LogoutAPIView(APIView):
     An endpoint for logout user.
     """
 
-    def post(self, request):
+    def get(self, request):
         response = Response()
         auth.logout(request)
         response.data = {"message": "success"}
