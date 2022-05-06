@@ -1,6 +1,7 @@
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.db.models import Count
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.generics import ListAPIView, UpdateAPIView
@@ -13,6 +14,7 @@ from .paginators import UserListSetPagination
 from .serializers import (
     ChangePasswordSerializer,
     PersonalInfoSerializer,
+    UserActivitySerializer,
     UserListSerializer,
     UserMediaSerializer,
     UserSerializer,
@@ -37,6 +39,7 @@ class RegisterAPIView(APIView):
                 user = user_serializer.save()
                 group = Group.objects.get(name="registered_group")
                 user.groups.add(group)
+                user.save()
 
             reg_data["user"] = user.pk
             info_serializer = PersonalInfoSerializer(data=reg_data)
@@ -192,7 +195,6 @@ class OauthAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        print(request.jwt_data)
         try:
             # if request.session['otp'] == "unverified":
             if Oauth_handler.verify_otp(request.user, request.jwt_data["otp"]):
@@ -205,15 +207,9 @@ class OauthAPIView(APIView):
                 data = {"message": "otp is incorrect!"}
                 status_code = status.HTTP_401_UNAUTHORIZED
 
-        # data = {
-        #         'message': "somthing wrong"
-        #         }
-        # status_code = status.HTTP_417_EXPECTATION_FAILED
-
         except Exception as e:
             data = {"message": "otp error!"}
             status_code = status.HTTP_417_EXPECTATION_FAILED
-            print(e)
 
         response = data
         return Response(response, status=status_code)
@@ -242,6 +238,62 @@ class UserListAPIView(ListAPIView):
             "uinfo__national_code",
             "can_trade",
         ]
-        params = request.jwt_data.get("search", "")
-        print(params)
+        return self.list(request, *args, **kwargs)
+
+
+class UserActivityView(ListAPIView):
+
+    http_method_names = ["post"]
+    permission_classes = (IsAuthenticated,)
+    # pagination_class = UserListSetPagination
+
+    # def get_queryset(self):
+    #     return User.objects.all()
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            if request.jwt_data["filter"] == "user_status":
+
+                self.serializer_class = UserListSerializer
+                return self._UserStatus(request, *args, **kwargs)
+
+            elif request.jwt_data["filter"] == "user_activity":
+                self.serializer_class = UserActivitySerializer
+                return self._UserActivity(request, *args, **kwargs)
+
+            else:
+                return Response(
+                    {"message": "Not Found!"}, status=status.HTTP_404_NOT_FOUND
+                )
+
+        except KeyError:
+            return Response(
+                {"message": "Invalid Data!"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def _UserStatus(self, request, *args, **kwargs):
+        data = {}
+        queryset = self.filter_queryset(User.objects.all())
+        page = self.paginate_queryset(queryset)
+
+        active_serializer = self.get_serializer(
+            queryset.filter(can_trade=True), many=True
+        )
+        deactive_serializer = self.get_serializer(
+            queryset.filter(can_trade=False), many=True
+        )
+
+        data["active"] = active_serializer.data
+        data["deactive"] = deactive_serializer.data
+
+        if page is not None:
+            return self.get_paginated_response(data)
+
+        return Response(data=data, status=status.HTTP_200_OK)
+
+    def _UserActivity(self, request, *args, **kwargs):
+        self.queryset = User.objects.filter(utransaction__status="paid").annotate(
+            transactions=Count("utransaction")
+        )
         return self.list(request, *args, **kwargs)

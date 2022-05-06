@@ -73,7 +73,9 @@ class UserWallet(models.Model):
 
 class Transaction(StatusModel):
 
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        to=User, on_delete=models.CASCADE, related_name="utransaction"
+    )
     coin_pairs = models.CharField(verbose_name="Coin pairs", max_length=50)
     coin_out = models.ForeignKey(
         to=UserWallet, on_delete=models.CASCADE, related_name="tcoinout"

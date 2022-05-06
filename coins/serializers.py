@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db import close_old_connections
 from django.db.models import F
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+# from rest_framework.validators import UniqueValidator
 
 import coins
 

@@ -19,7 +19,7 @@ class CustomUser(AbstractUser):
     is_email_verified = models.BooleanField(
         verbose_name="Email Verification Status", default=False
     )
-    can_trade = models.BooleanField(verbose_name="User Status", default=True)
+    can_trade = models.BooleanField(verbose_name="User Can Trade?", default=True)
     ref_code = models.CharField(
         verbose_name="Referral Code", max_length=255, blank=True, null=True
     )

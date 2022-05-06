@@ -1,4 +1,5 @@
 from statistics import mode
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -69,9 +70,10 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(PersonalInfo)
 class PersonalInfoAdmin(admin.ModelAdmin):
-    '''
+    """
     This class is used to register the PersonalInfo model to the admin panel.
-    '''
+    """
+
     model = PersonalInfo
     list_display = ("id", "user", "first_name", "last_name", "created_at")
     list_filter = ()
@@ -79,9 +81,10 @@ class PersonalInfoAdmin(admin.ModelAdmin):
 
 @admin.register(OauthInfo)
 class OautInfoAdmin(admin.ModelAdmin):
-    '''
+    """
     This class is used to register the OauthInfo model to the admin panel.
-    '''
+    """
+
     model = OauthInfo
     list_display = ("id", "user", "secret", "is_enabled", "created_at")
     list_filter = ("user",)
@@ -93,9 +96,10 @@ class OautInfoAdmin(admin.ModelAdmin):
 
 @admin.register(UserMedia)
 class UserMediaAdmin(admin.ModelAdmin):
-    '''
+    """
     This class is used to register the OauthInfo model to the admin panel.
-    '''
+    """
+
     model = OauthInfo
     list_display = ("id", "user", "created_at")
     list_filter = ("user",)

@@ -272,7 +272,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
+        fields = (
             "id",
             "email",
             "phone",
@@ -283,4 +283,12 @@ class UserListSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "national_code",
-        ]
+        )
+
+
+class UserActivitySerializer(UserListSerializer):
+
+    transactions = serializers.IntegerField()
+
+    class Meta(UserListSerializer.Meta):
+        fields = UserListSerializer.Meta.fields + ("transactions",)
