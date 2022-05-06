@@ -2,7 +2,7 @@ from statistics import mode
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import CustomUser, OauthInfo, PersonalInfo
+from .models import CustomUser, OauthInfo, PersonalInfo, UserMedia
 
 
 @admin.register(CustomUser)
@@ -84,6 +84,20 @@ class OautInfoAdmin(admin.ModelAdmin):
     '''
     model = OauthInfo
     list_display = ("id", "user", "secret", "is_enabled", "created_at")
+    list_filter = ("user",)
+    search_fields = (
+        "id",
+        "user",
+    )
+
+
+@admin.register(UserMedia)
+class UserMediaAdmin(admin.ModelAdmin):
+    '''
+    This class is used to register the OauthInfo model to the admin panel.
+    '''
+    model = OauthInfo
+    list_display = ("id", "user", "created_at")
     list_filter = ("user",)
     search_fields = (
         "id",
