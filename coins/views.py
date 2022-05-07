@@ -14,7 +14,7 @@ class TradeAPIView(CreateAPIView):
     An endpoint for crreating a new transaction
     """
 
-    permission_classes = [AllowAny]  # [IsAuthenticated, TradePermission]
+    permission_classes = [IsAuthenticated, TradePermission]
     serializer_class = TransactionSerializer
 
     def create(self, request, *args, **kwargs):
@@ -30,7 +30,7 @@ class UserWalletAPIView(ReadOnlyModelViewSet):
     An endpoint for retrieving a user's wallet
     """
 
-    permission_classes = [AllowAny]  # [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = UserWalletSerializer
 
     def get_queryset(self):

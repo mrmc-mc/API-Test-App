@@ -5,7 +5,7 @@ from django.db.models import Count
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.generics import ListAPIView, UpdateAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -28,7 +28,6 @@ class RegisterAPIView(APIView):
     """
     An endpoint for register user.
     """
-
     permission_classes = (AllowAny,)
 
     def post(self, request):
@@ -70,7 +69,8 @@ class LoginAPIView(APIView):
     """
     An endpoint for login.
     """
-
+    permission_classes = (AllowAny,)
+    
     def post(self, request):
 
         data = {}
@@ -221,7 +221,7 @@ class UserListAPIView(ListAPIView):
     """
 
     serializer_class = UserListSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,) #(IsAuthenticated,)
 
     # pagination_class = UserListSetPagination
 
@@ -242,9 +242,11 @@ class UserListAPIView(ListAPIView):
 
 
 class UserActivityView(ListAPIView):
-
+    """
+    An endpoint for listing specific users's details.
+    """
     http_method_names = ["post"]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,) #(IsAuthenticated,)
     # pagination_class = UserListSetPagination
 
     # def get_queryset(self):
