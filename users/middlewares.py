@@ -69,13 +69,13 @@ class OauthMiddleware:
     def __call__(self, request):
 
         response = self.get_response(request)
-        _path = request.path
+
 
         if request.user.is_authenticated and request.user.uauth.is_enabled:
 
-            if "otp" in request.session and str(request.session["otp"]) == "verified":
+            if "otp" in request.session and request.session["otp"] == "verified":
 
-                if _path in OAUTH_EXCLUDE_PATH:
+                if request.path in OAUTH_EXCLUDE_PATH:
                     return JsonResponse(
                         data={
                             "jwt": Jwt_handler.encode({"message": "somthing wrong!"})
@@ -86,11 +86,10 @@ class OauthMiddleware:
                 else:
                     return response
 
-            elif _path not in OAUTH_EXCLUDE_PATH:
+            elif request.path not in OAUTH_EXCLUDE_PATH:
                 return OAUTH_ERROR
 
             else:
-                print("!" * 90)
                 return response
 
         else:
