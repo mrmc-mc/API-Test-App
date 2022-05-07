@@ -91,7 +91,8 @@ class OauthMiddleware:
 
             else:
                 return response
-
+            # We Can use settings.SESSION_EXPIRE_AT_BROWSER_CLOSE=True if close browser
+            
         else:
             return response
 
@@ -127,8 +128,6 @@ class DataToJwtMiddleware:
         if hasattr(response, "data"):
             _data = json.dumps(
                 {"jwt": (Jwt_handler.encode(response.data))},
-                indent=8,
-                sort_keys=True,
                 default=DjangoJSONEncoder,
             )
             response.data = _data
