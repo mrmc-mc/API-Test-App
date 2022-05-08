@@ -1,4 +1,3 @@
-from symtable import Symbol
 from django.contrib.auth import get_user_model
 from django.db import close_old_connections
 from django.db.models import F

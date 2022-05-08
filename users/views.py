@@ -299,3 +299,5 @@ class UserActivityView(ListAPIView):
             transactions=Count("utransaction")
         )
         return self.list(request, *args, **kwargs)
+
+

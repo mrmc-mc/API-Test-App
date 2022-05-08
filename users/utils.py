@@ -108,6 +108,51 @@ class Email:
 
         except Exception as e:
             return False
+        
+    @staticmethod   
+    def SendResetPasswordToken(user):
+        try:
+            otp = randrange(100000, 999999)
+            cache.set(f"{user.id}_reg_otp", otp, timeout=3600 * 24 * 7)
+            subject = "Reset Password Code"
+            payload = {"otp": otp}
+            email_template_name = "users/auth_email_verify.html"
+            index = {
+                "email": user.email,
+                "text": f"TOPKENZ.COM: Your reset password code is: {otp}",
+                "jwt": Jwt_handler.encode(payload),
+            }
+            body = render_to_string(email_template_name, index)
+
+            EmailThread(
+                subject=subject,
+                body=body,
+                sender=settings.DEFAULT_FROM_EMAIL,
+                email=[
+                    user.email,
+                ],
+            ).start()
+
+        # except BadHeaderError:
+        #     pass
+        except Exception as e:
+            print(e)
+            return False
+
+
+    @staticmethod
+    def VerifyResetPasswordToken(request, user):
+        try:
+            u_otp = request.jwt_data["otp"]
+            otp = cache.get(f"{user.id}_reg_otp")
+            cache.delete(f"{user.id}_reg_otp")
+            if int(u_otp) == int(otp):
+                return True
+            else:
+                return False
+
+        except Exception as e:
+            return False
 
 
 class Oauth_handler:
